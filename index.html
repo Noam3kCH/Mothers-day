@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Mother's Day! 💐</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
+
+- { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+  –pink: #ff6b9d; –yellow: #ffd93d; –mint: #6bcb77;
+  –purple: #845ec2; –coral: #ff9671; –sky: #4d96ff; –bg: #fff5f9;
+  }
+  body {
+  font-family: ‘Nunito’, sans-serif;
+  background: var(–bg);
+  min-height: 100vh;
+  overflow-x: hidden;
+  }
+  body::before {
+  content: ‘’;
+  position: fixed; inset: 0;
+  background-image:
+  radial-gradient(circle, #ff6b9d22 1px, transparent 1px),
+  radial-gradient(circle, #ffd93d22 1px, transparent 1px),
+  radial-gradient(circle, #6bcb7722 1px, transparent 1px);
+  background-size: 40px 40px, 60px 60px, 80px 80px;
+  background-position: 0 0, 20px 20px, 40px 10px;
+  pointer-events: none; z-index: 0;
+  }
+  #app { position: relative; z-index: 1; max-width: 700px; margin: 0 auto; padding: 20px; }
+
+#intro { text-align: center; padding: 40px 20px; }
+.intro-emoji { font-size: 80px; animation: bounce 1s infinite alternate; display: block; }
+@keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-20px); } }
+.intro-title {
+font-family: ‘Fredoka One’, cursive;
+font-size: clamp(2rem, 8vw, 3.5rem);
+color: var(–pink); margin: 20px 0 10px;
+line-height: 1.1; text-shadow: 3px 3px 0 #ffd93d;
+}
+.intro-sub { font-size: 1.2rem; color: var(–purple); font-weight: 700; margin-bottom: 40px; }
+.big-btn {
+display: inline-block;
+background: linear-gradient(135deg, var(–pink), var(–coral));
+color: white; font-family: ‘Fredoka One’, cursive; font-size: 1.8rem;
+padding: 18px 50px; border: none; border-radius: 60px; cursor: pointer;
+box-shadow: 0 8px 0 #c94d7a, 0 10px 20px rgba(255,107,157,0.4);
+transition: transform 0.1s, box-shadow 0.1s; letter-spacing: 1px;
+}
+.big-btn:hover { transform: translateY(-3px); box-shadow: 0 11px 0 #c94d7a, 0 15px 25px rgba(255,107,157,0.4); }
+.big-btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #c94d7a; }
+
+#game { display: none; }
+.progress-bar-wrap {
+background: #ffd6e7; border-radius: 20px; height: 18px;
+margin-bottom: 20px; overflow: hidden; border: 2px solid var(–pink);
+}
+.progress-bar-fill {
+height: 100%;
+background: linear-gradient(90deg, var(–pink), var(–coral));
+border-radius: 20px; transition: width 0.5s ease;
+}
+.question-counter {
+text-align: center; font-family: ‘Fredoka One’, cursive;
+font-size: 1.2rem; color: var(–purple); margin-bottom: 15px;
+}
+.photo-frame {
+background: white; border-radius: 20px; padding: 12px 12px 30px;
+box-shadow: 0 8px 30px rgba(0,0,0,0.12), 0 0 0 3px var(–yellow);
+margin-bottom: 25px; transform-origin: center; transition: transform 0.3s;
+}
+.photo-frame img {
+width: 100%; border-radius: 12px; display: block;
+max-height: 380px; object-fit: cover;
+}
+.question-text {
+text-align: center; font-family: ‘Fredoka One’, cursive;
+font-size: clamp(1.3rem, 4vw, 1.7rem); color: #333;
+margin-bottom: 20px; line-height: 1.3;
+}
+.options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.option-btn {
+background: white; border: 3px solid #e0e0e0; border-radius: 16px;
+padding: 16px 12px; font-family: ‘Nunito’, sans-serif;
+font-size: clamp(0.9rem, 3vw, 1.05rem); font-weight: 800; color: #333;
+cursor: pointer; transition: all 0.15s; box-shadow: 0 4px 0 #ddd; line-height: 1.3;
+}
+.option-btn:hover:not(:disabled) {
+border-color: var(–sky); transform: translateY(-2px);
+box-shadow: 0 6px 0 #99c4ff; background: #f0f8ff;
+}
+.option-btn.correct {
+background: #d4f7dc; border-color: var(–mint);
+box-shadow: 0 4px 0 #4a9e57; color: #1a6e2a;
+animation: correctPop 0.4s ease;
+}
+.option-btn.wrong {
+background: #ffe0e8; border-color: var(–pink);
+box-shadow: 0 4px 0 #c94d7a; color: #9e1a3c;
+animation: wrongWobble 0.6s ease;
+}
+@keyframes correctPop {
+0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); }
+}
+@keyframes wrongWobble {
+0%, 100% { transform: translateX(0) rotate(0); }
+15% { transform: translateX(-12px) rotate(-4deg); }
+30% { transform: translateX(12px) rotate(4deg); }
+45% { transform: translateX(-10px) rotate(-3deg); }
+60% { transform: translateX(10px) rotate(3deg); }
+75% { transform: translateX(-6px) rotate(-2deg); }
+90% { transform: translateX(6px) rotate(2deg); }
+}
+#wrong-overlay {
+display: none; position: fixed; inset: 0;
+background: rgba(255,50,100,0.15); z-index: 100;
+pointer-events: none; animation: flashRed 0.5s ease;
+}
+@keyframes flashRed { 0% { opacity: 1; } 100% { opacity: 0; } }
+.wonky-emoji {
+position: fixed; font-size: 80px; z-index: 101;
+pointer-events: none; animation: flyAcross 1.2s ease forwards;
+}
+@keyframes flyAcross {
+0% { transform: translate(-100px, 50vh) rotate(-30deg) scale(0.5); opacity: 1; }
+50% { transform: translate(50vw, 30vh) rotate(20deg) scale(1.5); opacity: 1; }
+100% { transform: translate(110vw, 60vh) rotate(-10deg) scale(0.8); opacity: 0; }
+}
+.correct-reveal {
+text-align: center; background: white; border-radius: 20px;
+padding: 25px; margin-top: 15px;
+box-shadow: 0 6px 20px rgba(0,0,0,0.1); border: 3px solid var(–mint);
+animation: popIn 0.4s ease;
+}
+@keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.correct-reveal .yay { font-size: 50px; }
+.correct-reveal h3 { font-family: ‘Fredoka One’, cursive; font-size: 1.6rem; color: var(–mint); margin: 10px 0 5px; }
+.correct-reveal p { font-size: 1.1rem; color: #555; margin-bottom: 20px; font-weight: 600; }
+.next-btn {
+background: linear-gradient(135deg, var(–mint), #4aaa5a);
+color: white; font-family: ‘Fredoka One’, cursive; font-size: 1.5rem;
+padding: 14px 40px; border: none; border-radius: 50px; cursor: pointer;
+box-shadow: 0 6px 0 #2e7a3a; transition: transform 0.1s, box-shadow 0.1s;
+}
+.next-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 0 #2e7a3a; }
+.next-btn:active { transform: translateY(3px); box-shadow: 0 3px 0 #2e7a3a; }
+
+#final { display: none; text-align: center; padding: 30px 20px; }
+.final-fireworks { font-size: 60px; display: block; animation: spin 2s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.final-title {
+font-family: ‘Fredoka One’, cursive;
+font-size: clamp(2rem, 7vw, 3rem); color: var(–pink);
+text-shadow: 3px 3px 0 var(–yellow); margin: 15px 0; line-height: 1.2;
+}
+.prize-box {
+background: linear-gradient(135deg, #fff9e6, #fff0d4);
+border: 4px solid var(–yellow); border-radius: 24px; padding: 30px;
+margin: 25px 0; box-shadow: 0 8px 30px rgba(255,217,61,0.3);
+animation: glow 2s ease-in-out infinite alternate;
+}
+@keyframes glow {
+from { box-shadow: 0 8px 30px rgba(255,217,61,0.3); }
+to { box-shadow: 0 8px 40px rgba(255,217,61,0.7); }
+}
+.prize-box h2 { font-family: ‘Fredoka One’, cursive; font-size: 1.8rem; color: var(–coral); margin-bottom: 15px; }
+.prize-location {
+font-family: ‘Fredoka One’, cursive;
+font-size: clamp(1.8rem, 6vw, 2.5rem); color: var(–purple);
+background: white; border-radius: 16px; padding: 15px 25px;
+margin: 15px 0; border: 3px dashed var(–purple);
+animation: wiggle 1s ease-in-out infinite;
+}
+@keyframes wiggle { 0%, 100% { transform: rotate(-1deg); } 50% { transform: rotate(1deg); } }
+.prizes-list { margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.prize-item {
+background: white; border-radius: 14px; padding: 12px;
+font-size: 1rem; font-weight: 800; color: #444;
+border: 2px solid #eee; box-shadow: 0 3px 0 #eee;
+}
+.floating-hearts { position: fixed; inset: 0; pointer-events: none; z-index: 200; overflow: hidden; }
+.heart { position: absolute; font-size: 30px; animation: floatUp linear forwards; bottom: -50px; }
+@keyframes floatUp {
+0% { transform: translateY(0) rotate(0deg) scale(0.5); opacity: 1; }
+100% { transform: translateY(-110vh) rotate(360deg) scale(1); opacity: 0; }
+}
+.photo-frame.wobble { animation: frameWobble 0.6s ease; }
+@keyframes frameWobble {
+0%, 100% { transform: rotate(0deg); }
+20% { transform: rotate(-5deg); } 40% { transform: rotate(5deg); }
+60% { transform: rotate(-4deg); } 80% { transform: rotate(4deg); }
+}
+.star-burst {
+position: fixed; font-size: 40px; pointer-events: none; z-index: 150;
+animation: starPop 0.8s ease forwards;
+}
+@keyframes starPop {
+0% { transform: scale(0) rotate(0); opacity: 1; }
+60% { transform: scale(1.5) rotate(180deg); opacity: 1; }
+100% { transform: scale(0.5) rotate(360deg); opacity: 0; }
+}
+</style>
+
+</head>
+<body>
+<div id="app">
+  <div id="intro">
+    <span class="intro-emoji">💐</span>
+    <div class="intro-title">Happy Mother's Day!</div>
+    <div class="intro-sub">Can you guess where these photos were taken? 📸</div>
+    <button class="big-btn" onclick="startGame()">Let's Play! 🎉</button>
+  </div>
+
+  <div id="game">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="question-counter" id="q-counter">Question 1 of 10</div>
+    <div class="photo-frame" id="photo-frame">
+      <img id="photo-img" src="" alt="Family photo" />
+    </div>
+    <div class="question-text">🤔 Where was this photo taken?</div>
+    <div class="options-grid" id="options-grid"></div>
+    <div id="correct-feedback" class="correct-reveal" style="display:none">
+      <div class="yay">🌟</div>
+      <h3>Amazing!! You got it!</h3>
+      <p id="reveal-text"></p>
+      <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next Photo ➡️</button>
+    </div>
+  </div>
+
+  <div id="final">
+    <span class="final-fireworks">🎆</span>
+    <div class="final-title">You did it!! 🎉<br>Now for your prize...</div>
+    <div class="prize-box">
+      <h2>🧦 Look in...</h2>
+      <div class="prize-location">Dad's Sock Drawer! 🧦</div>
+      <p style="font-size:1.1rem; color:#666; font-weight:700; margin-top:10px;">Your presents are hiding in there! 👀</p>
+      <div class="prizes-list">
+        <div class="prize-item">🪵 A wooden heart</div>
+        <div class="prize-item">🖼️ 4 picture frames</div>
+        <div class="prize-item">🍫 2 chocolate packs</div>
+        <div class="prize-item">💝 All our love!</div>
+      </div>
+    </div>
+    <div style="font-family:'Fredoka One',cursive; font-size:1.5rem; color:var(--purple); margin-top:20px;">
+      We love you SO much, Mummy! 💐
+    </div>
+  </div>
+</div>
+
+<div id="wrong-overlay"></div>
+<div class="floating-hearts" id="hearts-container"></div>
+
+<script>
+const QUESTIONS = [{"img": "photos/IMG_8445.jpeg", "correct": "Italy", "reveal": "The Italian Dolomites! \ud83c\udfd4\ufe0f", "options": ["Italy", "Our backyard", "The moon \ud83c\udf19", "A giant anthill"]}, {"img": "photos/IMG_9810.jpeg", "correct": "Our old apartment", "reveal": "Our old apartment terrace! \ud83c\udfe0", "options": ["Grandma's igloo", "The North Pole", "A space station", "Our old apartment"]}, {"img": "photos/IMG_0174.jpeg", "correct": "Tel Aviv Port", "reveal": "Tel Aviv Port at sunset! \ud83c\udf05", "options": ["Dinosaur Land", "A chocolate factory", "The bathtub", "Tel Aviv Port"]}, {"img": "photos/IMG_0888.jpeg", "correct": "A park in Israel", "reveal": "A beautiful park in Israel! \ud83c\udf38", "options": ["A park in Israel", "A candy shop", "Dad's office", "The jungle"]}, {"img": "photos/IMG_1487.jpeg", "correct": "Home \u2013 birthday breakfast!", "reveal": "Our kitchen for the birthday breakfast! \ud83c\udf82", "options": ["A bakery on Mars", "The swimming pool", "A pizza restaurant", "Home \u2013 birthday breakfast!"]}, {"img": "photos/IMG_1621.jpeg", "correct": "A garden birthday party", "reveal": "A garden birthday party! \ud83c\udf88", "options": ["A penguin habitat", "An underwater cave", "The supermarket", "A garden birthday party"]}, {"img": "photos/IMG_2016.jpeg", "correct": "Karma Bread caf\u00e9", "reveal": "Karma Bread caf\u00e9! \u2615", "options": ["Karma Bread caf\u00e9", "A treehouse", "Dad's sock drawer", "A pirate ship"]}, {"img": "photos/IMG_3956.jpeg", "correct": "The Seven Sisters cliffs", "reveal": "The Seven Sisters cliffs in England! \ud83e\udd0d", "options": ["The edge of a giant cake", "The Seven Sisters cliffs", "Antarctica", "A cloud made of cheese"]}, {"img": "photos/IMG_4281.jpeg", "correct": "The Natural History Museum", "reveal": "The Natural History Museum in London! \ud83e\udd95", "options": ["Outer space", "A haunted castle", "The Natural History Museum", "Our living room"]}, {"img": "photos/IMG_4984.jpeg", "correct": "Holland Park", "reveal": "Holland Park in London! \ud83c\udf42", "options": ["A magical fairy forest", "Holland Park", "Grandpa's garden on Jupiter", "The zoo \u2013 but backwards"]}];
+let current = 0;
+let answered = false;
+const WONKY_EMOJIS = ['🤪','😵','🙃','👻','🤯','😜','🐡','🦆','🐸','🤡'];
+
+function startGame() {
+  document.getElementById('intro').style.display = 'none';
+  document.getElementById('game').style.display = 'block';
+  loadQuestion(0);
+}
+
+function loadQuestion(idx) {
+  answered = false; current = idx;
+  const q = QUESTIONS[idx];
+  document.getElementById('progress-fill').style.width = (idx / QUESTIONS.length * 100) + '%';
+  document.getElementById('q-counter').textContent = `Question ${idx+1} of ${QUESTIONS.length}`;
+  document.getElementById('photo-img').src = q.img;
+  document.getElementById('photo-frame').classList.remove('wobble');
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = '';
+  q.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt;
+    btn.onclick = () => handleAnswer(opt, q.correct, btn);
+    grid.appendChild(btn);
+  });
+  document.getElementById('correct-feedback').style.display = 'none';
+}
+
+function handleAnswer(chosen, correct, btn) {
+  if (answered) return;
+  if (chosen === correct) {
+    answered = true;
+    btn.classList.add('correct');
+    document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+    const q = QUESTIONS[current];
+    document.getElementById('reveal-text').textContent = '📍 ' + q.reveal;
+    document.getElementById('correct-feedback').style.display = 'block';
+    spawnStars();
+    const nextBtn = document.getElementById('next-btn');
+    nextBtn.textContent = current === QUESTIONS.length - 1 ? '🎁 Reveal the Prize!' : 'Next Photo ➡️';
+  } else {
+    btn.classList.add('wrong');
+    btn.disabled = true;
+    showWrongEffect();
+    setTimeout(() => { btn.classList.remove('wrong'); btn.disabled = false; }, 800);
+  }
+}
+
+function showWrongEffect() {
+  const overlay = document.getElementById('wrong-overlay');
+  overlay.style.display = 'block';
+  overlay.style.animation = 'none';
+  overlay.offsetHeight;
+  overlay.style.animation = 'flashRed 0.5s ease forwards';
+  setTimeout(() => overlay.style.display = 'none', 500);
+  const frame = document.getElementById('photo-frame');
+  frame.classList.remove('wobble'); frame.offsetHeight; frame.classList.add('wobble');
+  const emoji = document.createElement('div');
+  emoji.className = 'wonky-emoji';
+  emoji.textContent = WONKY_EMOJIS[Math.floor(Math.random() * WONKY_EMOJIS.length)];
+  emoji.style.top = (20 + Math.random() * 50) + 'vh';
+  document.body.appendChild(emoji);
+  setTimeout(() => emoji.remove(), 1300);
+  playWonkySound();
+}
+
+function playWonkySound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(400, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.5);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.6);
+  } catch(e) {}
+}
+
+function playCorrectSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [523, 659, 784, 1047].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine'; osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.2, ctx.currentTime + i*0.1);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i*0.1 + 0.3);
+      osc.start(ctx.currentTime + i*0.1); osc.stop(ctx.currentTime + i*0.1 + 0.3);
+    });
+  } catch(e) {}
+}
+
+function spawnStars() {
+  playCorrectSound();
+  ['⭐','🌟','✨','💫'].forEach((s) => {
+    const el = document.createElement('div');
+    el.className = 'star-burst';
+    el.textContent = s;
+    el.style.left = (20 + Math.random() * 60) + 'vw';
+    el.style.top = (20 + Math.random() * 40) + 'vh';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 900);
+  });
+}
+
+function nextQuestion() {
+  if (current === QUESTIONS.length - 1) { showFinal(); }
+  else { loadQuestion(current + 1); }
+}
+
+function showFinal() {
+  document.getElementById('game').style.display = 'none';
+  document.getElementById('final').style.display = 'block';
+  launchHearts(); playFinalFanfare();
+}
+
+function launchHearts() {
+  const container = document.getElementById('hearts-container');
+  const hearts = ['❤️','💖','💕','💗','💓','🌸','💐'];
+  let count = 0;
+  const interval = setInterval(() => {
+    const h = document.createElement('div');
+    h.className = 'heart';
+    h.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+    h.style.left = Math.random() * 100 + 'vw';
+    h.style.animationDuration = (3 + Math.random() * 3) + 's';
+    h.style.fontSize = (20 + Math.random() * 30) + 'px';
+    container.appendChild(h);
+    setTimeout(() => h.remove(), 6000);
+    count++;
+    if (count > 60) clearInterval(interval);
+  }, 150);
+}
+
+function playFinalFanfare() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [523, 659, 784, 659, 784, 1047].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine'; osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.25, ctx.currentTime + i*0.15);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i*0.15 + 0.4);
+      osc.start(ctx.currentTime + i*0.15); osc.stop(ctx.currentTime + i*0.15 + 0.4);
+    });
+  } catch(e) {}
+}
+</script>
+
+</body>
+</html>
