@@ -319,19 +319,22 @@ font-weight: 700;
 margin-bottom: 18px;
 }
 
-.next-btn {
-display: inline-flex; align-items: center; gap: 8px;
-background: linear-gradient(135deg, var(–mint), #28b857);
-color: #fff;
-font-family: ‘Fredoka One’, cursive;
-font-size: 1.4rem;
-padding: 13px 36px;
-border: none; border-radius: 50px; cursor: pointer;
-box-shadow: 0 6px 0 var(–mint-dark);
-transition: transform 0.1s, box-shadow 0.1s;
+.auto-advance {
+display: flex; align-items: center; justify-content: center; gap: 12px;
+margin-top: 6px;
 }
-.next-btn:hover { transform: translateY(-3px); box-shadow: 0 9px 0 var(–mint-dark); }
-.next-btn:active { transform: translateY(3px); box-shadow: 0 3px 0 var(–mint-dark); }
+.countdown-ring {
+width: 42px; height: 42px; flex-shrink: 0;
+}
+.countdown-ring svg { width: 100%; height: 100%; }
+#countdown-circle {
+transition: stroke-dashoffset 0.05s linear;
+}
+.advance-label {
+font-family: ‘Fredoka One’, cursive;
+font-size: 1.15rem;
+color: var(–text3);
+}
 
 /* ─── WRONG FX ───────────────────────────────── */
 #wrong-overlay {
@@ -513,7 +516,19 @@ animation: floatUp linear forwards;
   <span class="yay-emoji">🌟</span>
   <h3>Amazing!! You got it!</h3>
   <p class="location-text" id="reveal-text"></p>
-  <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next Photo ➡️</button>
+  <div class="auto-advance">
+    <div class="countdown-ring">
+      <svg viewBox="0 0 40 40">
+        <circle cx="20" cy="20" r="17" fill="none" stroke="var(--border)" stroke-width="4"/>
+        <circle id="countdown-circle" cx="20" cy="20" r="17" fill="none"
+          stroke="var(--mint)" stroke-width="4"
+          stroke-dasharray="107" stroke-dashoffset="107"
+          stroke-linecap="round"
+          transform="rotate(-90 20 20)"/>
+      </svg>
+    </div>
+    <span class="advance-label" id="advance-label">Next up…</span>
+  </div>
 </div>
 ```
 
@@ -689,6 +704,9 @@ function loadQuestion(idx) {
   });
 
   document.getElementById('reveal-card').style.display = 'none';
+  const circle = document.getElementById('countdown-circle');
+  if (circle) circle.style.strokeDashoffset = '107';
+  if (countdownTimer) { cancelAnimationFrame(countdownTimer); countdownTimer = null; }
 }
 
 function handleAnswer(chosen, correct, btn) {
@@ -700,11 +718,12 @@ function handleAnswer(chosen, correct, btn) {
     document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
     const q = QUESTIONS[current];
     document.getElementById('reveal-text').textContent = '📍 ' + q.reveal;
+    const isLast = current === QUESTIONS.length - 1;
+    document.getElementById('advance-label').textContent = isLast ? 'Get your prize…' : 'Next up…';
     document.getElementById('reveal-card').style.display = 'block';
-    const nxt = document.getElementById('next-btn');
-    nxt.textContent = current === QUESTIONS.length - 1 ? '🎁 Reveal the Prize!' : 'Next Photo ➡️';
     spawnStars();
     playCorrectSound();
+    startCountdown(isLast);
   } else {
     btn.classList.add('wrong');
     btn.disabled = true;
@@ -775,6 +794,29 @@ function spawnStars() {
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 950);
   });
+}
+
+let countdownTimer = null;
+
+function startCountdown(isLast) {
+  const circle = document.getElementById('countdown-circle');
+  const DURATION = 2200; // ms total
+  const CIRCUMFERENCE = 107;
+  const start = performance.now();
+
+  if (countdownTimer) cancelAnimationFrame(countdownTimer);
+
+  function tick(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / DURATION, 1);
+    circle.style.strokeDashoffset = CIRCUMFERENCE * (1 - progress);
+    if (progress < 1) {
+      countdownTimer = requestAnimationFrame(tick);
+    } else {
+      nextQuestion();
+    }
+  }
+  countdownTimer = requestAnimationFrame(tick);
 }
 
 function nextQuestion() {
